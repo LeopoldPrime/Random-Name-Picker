@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Random Name Picker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2933, #020617);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 24px;
+      padding: 24px 28px 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 800px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.7rem;
+      letter-spacing: 0.03em;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(55, 65, 81, 0.5), rgba(15, 23, 42, 0.95));
+      border-radius: 18px;
+      padding: 16px 18px 18px;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.65);
+      background: #020617;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 5px;
+    }
+
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 9px 18px;
+      font: inherit;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      color: white;
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    button.secondary {
+      background: rgba(31, 41, 55, 0.9);
+      color: #e5e7eb;
+      box-shadow: none;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      font-size: 0.9rem;
+      padding: 7px 14px;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    button:not(:disabled):active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+    }
+
+    .status {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .status strong {
+      color: #e5e7eb;
+    }
+
+    .chip-list {
+      margin-top: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      max-width: 100%;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .chip-count {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+.picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* ⬅ centers horizontally */
+  justify-content: center; /* ⬅ centers vertically */
+  gap: 16px;
+  height: 100%;          /* ⬅ ensures full panel height is used */
+}
+
+
+    .display-box {
+      width: 100%;
+      min-height: 90px;
+      border-radius: 18px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top left, rgba(55, 65, 81, 0.5), rgba(15, 23, 42, 0.95));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #f9fafb;
+      letter-spacing: 0.04em;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .winner-badge {
+      min-height: 40px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top left, rgba(55, 65, 81, 0.5), rgba(15, 23, 42, 0.95));
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #e5e7eb;
+      font-size: 0.95rem;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .winner-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+    }
+
+    .winner-name {
+      font-weight: 700;
+      color: #facc15;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- LEFT: Input panel -->
+    <div>
+      <h1>Weighted Random Name Picker</h1>
+      <div class="subtitle">
+        Paste or type names, build the list, then pick a random name. Priority names win first if present.
+      </div>
+
+      <div class="panel">
+        <label for="names-input">Names (one per line)</label>
+        <textarea id="names-input" placeholder="Alice
+Bob
+Charlie
+Diana
+..."></textarea>
+        <div class="hint">
+          Empty lines are ignored. Duplicate names are allowed and increase that name's chances.
+        </div>
+
+        <div class="controls">
+          <button id="build-btn">Build List</button>
+          <button id="clear-btn" class="secondary">Clear</button>
+          <span class="status" id="status-text"></span>
+        </div>
+
+        <div class="chip-list" id="chip-list"></div>
+        <div class="chip-count" id="count-label"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Picker panel -->
+    <div class="panel">
+      <div class="picker-wrapper">
+        <div class="display-box" id="display-box">No names yet</div>
+
+        <button id="pick-btn" disabled>Pick Random Name</button>
+
+        <div class="winner-badge">
+          <span class="winner-label">Winner</span>
+          <span class="winner-name" id="winner-name">No pick yet</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const textarea = document.getElementById("names-input");
+    const buildBtn = document.getElementById("build-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const pickBtn = document.getElementById("pick-btn");
+    const statusText = document.getElementById("status-text");
+    const chipList = document.getElementById("chip-list");
+    const countLabel = document.getElementById("count-label");
+    const displayBox = document.getElementById("display-box");
+    const winnerNameEl = document.getElementById("winner-name");
+
+    // State
+    let names = [];
+    let picking = false;
+    let shuffleInterval = null;
+
+    // ===== PRIORITY ORDER (backend weighting) =====
+    // First name = highest priority, second = next, etc.
+    const priorityOrder = [
+      "Cass",   // 1st priority
+      "Ak",     // 2nd priority
+      "Sean", // 3rd priority
+      "Mara",
+      // add more here if you want
+    ];
+
+    const priorityRank = new Map(
+      priorityOrder.map((name, index) => [name.toLowerCase(), index])
+    );
+
+    function parseNames() {
+      return textarea.value
+        .split("\n")
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+    }
+
+    function updateChipList() {
+      chipList.innerHTML = "";
+      if (!names.length) return;
+
+      names.forEach(name => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = name;
+        chipList.appendChild(chip);
+      });
+    }
+
+    function buildList() {
+      names = parseNames();
+
+      if (!names.length) {
+        statusText.textContent = "Add at least one name.";
+        countLabel.textContent = "";
+        pickBtn.disabled = true;
+        displayBox.textContent = "No names yet";
+        winnerNameEl.textContent = "No pick yet";
+      } else {
+        statusText.innerHTML = `<strong>${names.length}</strong> name${names.length === 1 ? "" : "s"} in the list.`;
+        countLabel.textContent = `Names in list: ${names.length}`;
+        pickBtn.disabled = false;
+        displayBox.textContent = "Ready to pick";
+        winnerNameEl.textContent = "No pick yet";
+      }
+
+      updateChipList();
+    }
+
+    function clearAll() {
+      textarea.value = "";
+      names = [];
+      if (shuffleInterval) {
+        clearInterval(shuffleInterval);
+        shuffleInterval = null;
+      }
+
+      statusText.textContent = "";
+      countLabel.textContent = "";
+      pickBtn.disabled = true;
+      displayBox.textContent = "No names yet";
+      winnerNameEl.textContent = "No pick yet";
+      chipList.innerHTML = "";
+    }
+
+    // Priority-based pick
+    function getWeightedWinnerIndex() {
+      if (!names.length) return -1;
+
+      let bestRank = Infinity;
+      const bestIndices = [];
+
+      for (let i = 0; i < names.length; i++) {
+        const lower = names[i].toLowerCase();
+        const rank = priorityRank.get(lower);
+        if (rank !== undefined) {
+          if (rank < bestRank) {
+            bestRank = rank;
+            bestIndices.length = 0;
+            bestIndices.push(i);
+          } else if (rank === bestRank) {
+            bestIndices.push(i);
+          }
+        }
+      }
+
+      if (bestIndices.length > 0) {
+        const r = Math.floor(Math.random() * bestIndices.length);
+        return bestIndices[r];
+      }
+
+      // No priority names present: choose random from entire list
+      return Math.floor(Math.random() * names.length);
+    }
+
+    function startPick() {
+      if (!names.length || picking) return;
+
+      // Reset any previous animation
+      if (shuffleInterval) {
+        clearInterval(shuffleInterval);
+        shuffleInterval = null;
+      }
+
+      picking = true;
+      pickBtn.disabled = true;
+      buildBtn.disabled = true;
+      clearBtn.disabled = true;
+
+      displayBox.textContent = "Picking random name...";
+      statusText.textContent = "Picking random name...";
+      winnerNameEl.textContent = "…";
+
+      const shuffleDuration = 2000; // total ms
+      const shuffleSpeed = 80;      // ms between flashes
+      const startTime = performance.now();
+
+      shuffleInterval = setInterval(() => {
+        const elapsed = performance.now() - startTime;
+
+        // Show a random name while "thinking"
+        const randIndex = Math.floor(Math.random() * names.length);
+        displayBox.textContent = names[randIndex];
+
+        if (elapsed >= shuffleDuration) {
+          clearInterval(shuffleInterval);
+          shuffleInterval = null;
+
+          // Final weighted pick
+          const winnerIndex = getWeightedWinnerIndex();
+          const winner = names[winnerIndex];
+
+          displayBox.textContent = winner;
+          winnerNameEl.textContent = winner;
+          statusText.innerHTML = `Winner: <strong>${winner}</strong>`;
+
+          picking = false;
+          pickBtn.disabled = false;
+          buildBtn.disabled = false;
+          clearBtn.disabled = false;
+        }
+      }, shuffleSpeed);
+    }
+
+    // Event listeners
+    buildBtn.addEventListener("click", buildList);
+    clearBtn.addEventListener("click", clearAll);
+    pickBtn.addEventListener("click", startPick);
+
+    textarea.addEventListener("input", () => {
+      const count = parseNames().length;
+      if (count) {
+        statusText.textContent = `Ready: ${count} name${count === 1 ? "" : "s"}. Click "Build List".`;
+      } else {
+        statusText.textContent = "";
+      }
+    });
+
+    // Initial state
+    displayBox.textContent = "No names yet";
+  </script>
+</body>
+</html>
